@@ -1,0 +1,7 @@
+Django
+djangorestframework
+psycopg2-binary
+pgvector
+Pillow
+pandas
+django-filter
