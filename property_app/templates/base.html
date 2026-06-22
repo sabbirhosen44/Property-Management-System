@@ -1,15 +1,35 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>Property Management</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}StayFinder{% endblock %}</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
+    />
+    <link rel="stylesheet" href="{% static 'property_app/css/base.css' %}" />
+    {% block extra_css %}{% endblock %}
   </head>
   <body>
-    <nav>
-      <a href="/">Home</a>
+    <nav class="navbar">
+      <a href="{% url 'home' %}" class="nav-brand">
+        <i class="ti ti-building"></i> StayFinder
+      </a>
+      <ul class="nav-links">
+        <li><a href="{% url 'home' %}">Home</a></li>
+        <li><a href="{% url 'property_list' %}">Listings</a></li>
+        <li><a href="#">About</a></li>
+      </ul>
     </nav>
 
-    <hr />
+    <main>{% block content %}{% endblock %}</main>
 
-    {% block content %} {% endblock %}
+    <footer>
+      <p>&copy; 2026 StayFinder. All rights reserved.</p>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
   </body>
 </html>

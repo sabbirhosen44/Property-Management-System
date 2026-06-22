@@ -1,11 +1,61 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %} {% load static %} {% block title %}StayFinder —
+Vacation Rentals{% endblock %} {% block extra_css %}
+<link rel="stylesheet" href="{% static 'property_app/css/home.css' %}" />
+{% endblock %} {% block content %}
+<section class="hero">
+  <h1>Find your perfect vacation rental</h1>
+  <p>Explore thousands of verified properties across top destinations</p>
 
-<h1>Vacation Rental Search</h1>
+  <form class="search-form" method="get" action="{% url 'property_list' %}">
+    <i class="ti ti-map-pin search-icon"></i>
+    <input
+      type="text"
+      name="city"
+      placeholder="Enter a city or destination…"
+      value="{{ request.GET.city }}"
+    />
+    <button type="submit">Search</button>
+  </form>
 
-<form method="get" action="{% url 'property_list' %}">
-  <input type="text" name="city" placeholder="Enter city" />
+  <div class="stats">
+    <div class="stat-item">
+      <div class="num">2,400+</div>
+      <div class="label">Properties</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">180+</div>
+      <div class="label">Cities</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">4.8 ★</div>
+      <div class="label">Avg rating</div>
+    </div>
+  </div>
+</section>
 
-  <button type="submit">Search</button>
-</form>
-
+<section class="features">
+  <h2>Why book with us?</h2>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <i class="ti ti-shield-check"></i>
+      <h3>Verified listings</h3>
+      <p>
+        Every property is reviewed and confirmed before it goes live on our
+        platform.
+      </p>
+    </div>
+    <div class="feature-card">
+      <i class="ti ti-headset"></i>
+      <h3>24/7 support</h3>
+      <p>
+        Our support team is available around the clock whenever you need help.
+      </p>
+    </div>
+    <div class="feature-card">
+      <i class="ti ti-receipt"></i>
+      <h3>Best price guarantee</h3>
+      <p>Find a lower price elsewhere? We'll match it, no questions asked.</p>
+    </div>
+  </div>
+</section>
 {% endblock %}
