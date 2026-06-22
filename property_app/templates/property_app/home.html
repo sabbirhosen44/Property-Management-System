@@ -14,6 +14,12 @@ Vacation Rentals{% endblock %} {% block extra_css %}
       placeholder="Enter a city or destination…"
       value="{{ request.GET.city }}"
     />
+
+    <input type="number" step="any" name="lat" placeholder="Latitude" />
+
+    <input type="number" step="any" name="lng" placeholder="Longitude" />
+
+    <input type="number" name="radius" value="5" placeholder="Radius (km)" />
     <button type="submit">Search</button>
   </form>
 

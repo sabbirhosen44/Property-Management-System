@@ -1,0 +1,29 @@
+{% extends "base.html" %} {% block content %}
+
+<h1>{{ property.title }}</h1>
+
+<p>{{ property.description }}</p>
+
+<p>Price: {{ property.price }}</p>
+
+<p>Bedrooms: {{ property.bedrooms }}</p>
+
+<p>Bathrooms: {{ property.bathrooms }}</p>
+
+<p>Area: {{ property.area_sqft }}</p>
+
+<p>City: {{ property.location.city }}</p>
+
+{% if distance %}
+
+<p>Distance from city center: {{ distance|floatformat:2 }} km</p>
+
+{% endif %}
+
+<h2>Images</h2>
+
+{% for image in property.images.all %}
+
+<img src="{{ image.image.url }}" width="300" />
+
+{% endfor %} {% endblock %}

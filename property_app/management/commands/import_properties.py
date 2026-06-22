@@ -1,4 +1,5 @@
 import pandas as pd
+from django.contrib.gis.geos import Point
 
 from django.core.management.base import BaseCommand
 
@@ -25,6 +26,7 @@ class Command(BaseCommand):
         imported = 0
 
         for _, row in df.iterrows():
+            point = Point(float(row["longitude"]), float(row["latitude"]), srid=4326)
 
             location, _ = Location.objects.get_or_create(
                 name=row["city"],
@@ -33,6 +35,7 @@ class Command(BaseCommand):
                     "country": row["country"],
                     "state": row["state"],
                     "city": row["city"],
+                    "point": point,
                 },
             )
 
@@ -48,6 +51,7 @@ class Command(BaseCommand):
                     "bedrooms": row["bedrooms"],
                     "bathrooms": row["bathrooms"],
                     "address": row["address"],
+                    "point": point,
                 },
             )
 

@@ -1,0 +1,39 @@
+{% extends "base.html" %} {% block content %}
+
+<h1>Properties</h1>
+
+{% for property in properties %}
+
+<div>
+  <h3>
+    <a href="{% url 'property_detail' property.slug %}">
+      {{ property.title }}
+    </a>
+  </h3>
+
+  <p>{{ property.location.city }}</p>
+
+  <p>${{ property.price }}</p>
+</div>
+
+<hr />
+
+{% empty %}
+
+<p>No properties found.</p>
+
+{% endfor %}
+
+<div>
+  {% if page_obj.has_previous %}
+
+  <a href="?page={{ page_obj.previous_page_number }}"> Previous </a>
+
+  {% endif %} Page {{ page_obj.number }} {% if page_obj.has_next %}
+
+  <a href="?page={{ page_obj.next_page_number }}"> Next </a>
+
+  {% endif %}
+</div>
+
+{% endblock %}
