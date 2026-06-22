@@ -1,0 +1,322 @@
+/* ── Breadcrumb ── */
+.breadcrumb {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 1rem 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--ink-faint);
+    border-bottom: 1px solid var(--border);
+}
+
+.breadcrumb a {
+    color: var(--ink-muted);
+    text-decoration: none;
+    transition: color 0.12s;
+}
+
+.breadcrumb a:hover {
+    color: var(--ink);
+}
+
+.breadcrumb i {
+    font-size: 12px;
+}
+
+.breadcrumb span {
+    color: var(--ink);
+}
+
+/* ── Detail wrapper ── */
+.detail-wrap {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 0 2.5rem;
+}
+
+/* ── Gallery ── */
+.gallery {
+    height: 460px;
+    border-radius: 0;
+    overflow: hidden;
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-faint);
+    border-bottom: 1px solid var(--border);
+}
+
+.gallery img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.gallery-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.gallery-placeholder i {
+    font-size: 36px;
+}
+
+.gallery-placeholder span {
+    font-size: 14px;
+}
+
+/* ── Two-column layout ── */
+.detail-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 4rem;
+    padding-top: 3rem;
+    padding-bottom: 4rem;
+    align-items: start;
+}
+
+/* ── Main column ── */
+.detail-main {}
+
+.detail-type {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 10px;
+}
+
+.detail-title {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 4vw, 3rem);
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    color: var(--ink);
+    margin-bottom: 0.75rem;
+}
+
+.detail-location {
+    font-size: 14px;
+    color: var(--ink-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 2rem;
+}
+
+.detail-location i {
+    font-size: 15px;
+    color: var(--accent-dark);
+}
+
+/* Specs row */
+.detail-specs {
+    display: flex;
+    gap: 2rem;
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+}
+
+.detail-spec {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.detail-spec-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+
+.detail-spec-value {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+}
+
+/* Prose sections */
+.detail-section {
+    margin-bottom: 2.5rem;
+}
+
+.detail-section-title {
+    font-family: var(--serif);
+    font-size: 1.25rem;
+    color: var(--ink);
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.01em;
+}
+
+.detail-section p {
+    font-size: 15px;
+    color: var(--ink-muted);
+    line-height: 1.8;
+}
+
+/* Amenities */
+.amenities-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 4px;
+}
+
+.amenity {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--ink-muted);
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.amenity i {
+    font-size: 15px;
+    color: var(--ink-faint);
+}
+
+/* Map */
+.detail-map {
+    background: var(--surface);
+    height: 260px;
+    border-radius: var(--r-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-faint);
+    font-size: 14px;
+    border: 1px solid var(--border);
+    flex-direction: column;
+    gap: 8px;
+}
+
+.detail-map i {
+    font-size: 28px;
+}
+
+/* ── Sidebar ── */
+.detail-sidebar {}
+
+.booking-box {
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    position: sticky;
+    top: 80px;
+    background: var(--white);
+}
+
+.booking-box-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.booking-price {
+    font-family: var(--serif);
+    font-size: 2rem;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.booking-price span {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--ink-faint);
+}
+
+.booking-price-note {
+    font-size: 12px;
+    color: var(--ink-faint);
+}
+
+.booking-box-body {
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.booking-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.booking-row:last-child {
+    border-bottom: none;
+}
+
+.booking-row-label {
+    color: var(--ink-muted);
+}
+
+.booking-row-value {
+    color: var(--ink);
+    font-weight: 500;
+}
+
+.booking-box-footer {
+    padding: 1.25rem 1.5rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.booking-box-footer .btn {
+    justify-content: center;
+    height: 46px;
+    font-size: 14px;
+    border-radius: var(--r-sm);
+}
+
+.booking-footnote {
+    font-size: 12px;
+    color: var(--ink-faint);
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 0 1.5rem 1rem;
+}
+
+/* ── Responsive ── */
+@media (max-width: 960px) {
+    .detail-layout {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+
+    .booking-box {
+        position: static;
+    }
+
+    .gallery {
+        height: 280px;
+    }
+
+    .detail-wrap {
+        padding: 0 1.25rem;
+    }
+
+    .breadcrumb {
+        padding: 1rem 1.25rem;
+    }
+}

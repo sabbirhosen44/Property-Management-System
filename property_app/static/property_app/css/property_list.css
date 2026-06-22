@@ -1,0 +1,326 @@
+/* ── Page top ── */
+.list-header {
+    border-bottom: 1px solid var(--border);
+    padding: 2rem 2.5rem 0;
+    max-width: 1160px;
+    margin: 0 auto;
+}
+
+.list-header h1 {
+    font-family: var(--serif);
+    font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+    letter-spacing: -0.025em;
+    color: var(--ink);
+    margin-bottom: 1.25rem;
+    line-height: 1.1;
+}
+
+.list-header h1 i {
+    font-style: italic;
+    color: var(--accent-dark);
+}
+
+/* Inline search */
+.list-search {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    overflow: hidden;
+    background: var(--white);
+    max-width: 480px;
+    margin-bottom: 1.5rem;
+}
+
+.list-search i {
+    padding: 0 0 0 14px;
+    font-size: 16px;
+    color: var(--ink-faint);
+    flex-shrink: 0;
+}
+
+.list-search input {
+    flex: 1;
+    height: 42px;
+    padding: 0 0.75rem;
+    border: none;
+    outline: none;
+    font-family: var(--sans);
+    font-size: 14px;
+    color: var(--ink);
+    background: transparent;
+}
+
+.list-search input::placeholder {
+    color: var(--ink-faint);
+}
+
+.list-search button {
+    height: 42px;
+    padding: 0 1.25rem;
+    background: var(--ink);
+    color: var(--white);
+    border: none;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.list-search button:hover {
+    background: #333330;
+}
+
+.list-meta {
+    font-size: 13px;
+    color: var(--ink-faint);
+    padding-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.list-meta a {
+    color: var(--ink-muted);
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.list-meta a:hover {
+    color: var(--ink);
+}
+
+/* ── Property list ── */
+.property-list {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 0 2.5rem;
+}
+
+/* Horizontal card — editorial listing style */
+.property-row {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.12s;
+    padding: 2rem 0;
+}
+
+.property-row:first-child {
+    padding-top: 2.5rem;
+}
+
+.property-row:hover {
+    background: var(--surface);
+    margin: 0 -2.5rem;
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+}
+
+.property-row-image {
+    width: 260px;
+    height: 175px;
+    border-radius: var(--r-md);
+    overflow: hidden;
+    background: var(--surface);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-faint);
+}
+
+.property-row-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.property-row-image i {
+    font-size: 28px;
+}
+
+.property-row-content {
+    padding: 0 0 0 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.property-row-top {}
+
+.property-row-type {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 6px;
+}
+
+.property-row-title {
+    font-family: var(--serif);
+    font-size: 1.35rem;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+    line-height: 1.25;
+    margin-bottom: 8px;
+}
+
+.property-row-location {
+    font-size: 13px;
+    color: var(--ink-muted);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 0.75rem;
+}
+
+.property-row-location i {
+    font-size: 14px;
+    color: var(--ink-faint);
+}
+
+.property-row-desc {
+    font-size: 14px;
+    color: var(--ink-muted);
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.property-row-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.property-row-price {
+    font-family: var(--serif);
+    font-size: 1.4rem;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+}
+
+.property-row-price span {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ink-faint);
+}
+
+.property-row-specs {
+    display: flex;
+    gap: 1rem;
+}
+
+.spec-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    color: var(--ink-muted);
+}
+
+.spec-item i {
+    font-size: 14px;
+    color: var(--ink-faint);
+}
+
+/* ── Empty ── */
+.empty-state {
+    padding: 5rem 0;
+    text-align: center;
+}
+
+.empty-state h3 {
+    font-family: var(--serif);
+    font-size: 1.5rem;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    font-size: 14px;
+    color: var(--ink-muted);
+    margin-bottom: 1.5rem;
+}
+
+/* ── Pagination ── */
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 2.5rem 0 3rem;
+    justify-content: center;
+}
+
+.page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 8px;
+    border-radius: var(--r-sm);
+    font-size: 14px;
+    text-decoration: none;
+    color: var(--ink-muted);
+    border: 1px solid transparent;
+    transition: all 0.12s;
+}
+
+.page-link:hover {
+    border-color: var(--border);
+    color: var(--ink);
+}
+
+.page-link.active {
+    background: var(--ink);
+    color: var(--white);
+    border-color: var(--ink);
+}
+
+.page-link.disabled {
+    opacity: 0.35;
+    pointer-events: none;
+}
+
+@media (max-width: 768px) {
+    .list-header {
+        padding: 1.5rem 1.25rem 0;
+    }
+
+    .property-list {
+        padding: 0 1.25rem;
+    }
+
+    .property-row {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .property-row:hover {
+        margin: 0 -1.25rem;
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+    }
+
+    .property-row-image {
+        width: 100%;
+        height: 200px;
+    }
+
+    .property-row-content {
+        padding: 0;
+    }
+}

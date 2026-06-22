@@ -1,67 +1,111 @@
-{% extends "base.html" %} {% load static %} {% block title %}StayFinder —
-Vacation Rentals{% endblock %} {% block extra_css %}
+{% extends "property_app/base.html" %} {% load static %} {% block title %} Home
+{% endblock %} {% block extra_css %}
 <link rel="stylesheet" href="{% static 'property_app/css/home.css' %}" />
 {% endblock %} {% block content %}
+
 <section class="hero">
-  <h1>Find your perfect vacation rental</h1>
-  <p>Explore thousands of verified properties across top destinations</p>
+  <div class="container">
+    <div class="hero-content">
+      <span class="hero-badge"> GeoDjango + PostGIS + PGVector </span>
 
-  <form class="search-form" method="get" action="{% url 'property_list' %}">
-    <i class="ti ti-map-pin search-icon"></i>
-    <input
-      type="text"
-      name="city"
-      placeholder="Enter a city or destination…"
-      value="{{ request.GET.city }}"
-    />
+      <h1>Find Your Perfect Property Anywhere</h1>
 
-    <input type="number" step="any" name="lat" placeholder="Latitude" />
+      <p>
+        Search vacation rentals, villas, cottages, resorts and premium
+        properties with location-based search.
+      </p>
 
-    <input type="number" step="any" name="lng" placeholder="Longitude" />
+      <form method="get" action="{% url 'property_list' %}" class="search-form">
+        <input type="text" name="city" placeholder="Search by city..." />
 
-    <input type="number" name="radius" value="5" placeholder="Radius (km)" />
-    <button type="submit">Search</button>
-  </form>
-
-  <div class="stats">
-    <div class="stat-item">
-      <div class="num">2,400+</div>
-      <div class="label">Properties</div>
-    </div>
-    <div class="stat-item">
-      <div class="num">180+</div>
-      <div class="label">Cities</div>
-    </div>
-    <div class="stat-item">
-      <div class="num">4.8 ★</div>
-      <div class="label">Avg rating</div>
+        <button type="submit">Search Properties</button>
+      </form>
     </div>
   </div>
 </section>
 
-<section class="features">
-  <h2>Why book with us?</h2>
-  <div class="feature-grid">
-    <div class="feature-card">
-      <i class="ti ti-shield-check"></i>
-      <h3>Verified listings</h3>
-      <p>
-        Every property is reviewed and confirmed before it goes live on our
-        platform.
-      </p>
-    </div>
-    <div class="feature-card">
-      <i class="ti ti-headset"></i>
-      <h3>24/7 support</h3>
-      <p>
-        Our support team is available around the clock whenever you need help.
-      </p>
-    </div>
-    <div class="feature-card">
-      <i class="ti ti-receipt"></i>
-      <h3>Best price guarantee</h3>
-      <p>Find a lower price elsewhere? We'll match it, no questions asked.</p>
+<section class="stats">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>{{ total_properties }}</h3>
+
+        <p>Properties</p>
+      </div>
+
+      <div class="stat-card">
+        <h3>Geo Search</h3>
+
+        <p>Powered by PostGIS</p>
+      </div>
+
+      <div class="stat-card">
+        <h3>AI Search</h3>
+
+        <p>Powered by pgvector</p>
+      </div>
     </div>
   </div>
 </section>
+
+<section class="featured-properties">
+  <div class="container">
+    <div class="section-header">
+      <h2>Featured Properties</h2>
+
+      <p>Discover hand-picked premium listings.</p>
+    </div>
+
+    <div class="featured-grid">
+      {% for property in featured_properties %}
+
+      <article class="property-card">
+        <div class="property-image">
+          {% if property.images.first %}
+
+          <img
+            src="{{ property.images.first.image.url }}"
+            alt="{{ property.title }}"
+          />
+
+          {% else %}
+
+          <div class="placeholder-image">No Image Available</div>
+
+          {% endif %}
+        </div>
+
+        <div class="property-content">
+          <h3>{{ property.title }}</h3>
+
+          <p class="location">
+            {{ property.location.city }}, {{ property.location.country }}
+          </p>
+
+          <div class="property-meta">
+            <span> 🛏 {{ property.bedrooms }} Beds </span>
+
+            <span> 🛁 {{ property.bathrooms }} Baths </span>
+          </div>
+
+          <div class="price">${{ property.price }}</div>
+
+          <a
+            href="{% url 'property_detail' property.slug %}"
+            class="details-btn"
+          >
+            View Details
+          </a>
+        </div>
+      </article>
+
+      {% empty %}
+
+      <p>No properties available.</p>
+
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
 {% endblock %}
