@@ -1,109 +1,264 @@
-{% extends "property_app/base.html" %} {% load static %} {% block title %} Home
-{% endblock %} {% block extra_css %}
-<link rel="stylesheet" href="{% static 'property_app/css/home.css' %}" />
-{% endblock %} {% block content %}
+{% extends "property_app/base.html" %}
+{% load static %}
 
-<section class="hero">
+{% block title %}PropertyPulse — Find Your Perfect Property{% endblock %}
+{% block meta_description %}Discover {{ total_properties }} verified properties with AI geo-search on PropertyPulse — powered by GeoDjango, PostGIS and pgvector.{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'property_app/css/home.css' %}" />
+{% endblock %}
+
+{% block content %}
+
+<!-- ══════════════════════════════════
+     HERO
+══════════════════════════════════ -->
+<section class="hero" id="hero">
+  <!-- BG -->
+  <div class="hero-bg">
+    <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1800&q=80&auto=format"
+         alt="" aria-hidden="true" loading="eager" />
+    <div class="hero-gradient"></div>
+  </div>
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+
   <div class="container">
     <div class="hero-content">
-      <span class="hero-badge"> GeoDjango + PostGIS + PGVector </span>
 
-      <h1>Find Your Perfect Property Anywhere</h1>
+      <!-- Eyebrow -->
+      <div class="hero-eyebrow">
+        <span class="live-dot"></span>
+        GeoDjango &middot; PostGIS &middot; pgvector
+      </div>
 
-      <p>
-        Search vacation rentals, villas, cottages, resorts and premium
-        properties with location-based search.
+      <!-- Title -->
+      <h1 class="hero-title">
+        Find Your <span class="accent">Perfect</span><br />
+        Property, Anywhere
+      </h1>
+
+      <!-- Sub -->
+      <p class="hero-sub">
+        Spatial intelligence meets AI discovery. Search across
+        <strong style="color:#e2e8f0">{{ total_properties }}</strong> verified listings by location,
+        proximity, or description.
       </p>
 
-      <form method="get" action="{% url 'property_list' %}" class="search-form">
-        <input type="text" name="city" placeholder="Search by city..." />
+      <!-- Search with autocomplete -->
+      <form method="get" action="{% url 'property_list' %}" id="hero-search-form" role="search" autocomplete="off">
+        <div class="hero-search-box">
+          <div class="hero-search-icon-wrap">
+            <i class="ti ti-map-pin" aria-hidden="true"></i>
+          </div>
+          <div class="hero-search-divider"></div>
 
-        <button type="submit">Search Properties</button>
-      </form>
-    </div>
-  </div>
-</section>
-
-<section class="stats">
-  <div class="container">
-    <div class="stats-grid">
-      <div class="stat-card">
-        <h3>{{ total_properties }}</h3>
-
-        <p>Properties</p>
-      </div>
-
-      <div class="stat-card">
-        <h3>Geo Search</h3>
-
-        <p>Powered by PostGIS</p>
-      </div>
-
-      <div class="stat-card">
-        <h3>AI Search</h3>
-
-        <p>Powered by pgvector</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="featured-properties">
-  <div class="container">
-    <div class="section-header">
-      <h2>Featured Properties</h2>
-
-      <p>Discover hand-picked premium listings.</p>
-    </div>
-
-    <div class="featured-grid">
-      {% for property in featured_properties %}
-
-      <article class="property-card">
-        <div class="property-image">
-          {% if property.images.first %}
-
-          <img
-            src="{{ property.images.first.image.url }}"
-            alt="{{ property.title }}"
-          />
-
-          {% else %}
-
-          <div class="placeholder-image">No Image Available</div>
-
-          {% endif %}
-        </div>
-
-        <div class="property-content">
-          <h3>{{ property.title }}</h3>
-
-          <p class="location">
-            {{ property.location.city }}, {{ property.location.country }}
-          </p>
-
-          <div class="property-meta">
-            <span> 🛏 {{ property.bedrooms }} Beds </span>
-
-            <span> 🛁 {{ property.bathrooms }} Baths </span>
+          <!-- Autocomplete wrapper -->
+          <div class="hero-autocomplete-wrap">
+            <input
+              id="hero-city-input"
+              class="hero-search-input"
+              type="text"
+              name="city"
+              placeholder="Search by city or neighbourhood…"
+              autocomplete="off"
+              aria-label="Search properties by city"
+              aria-autocomplete="list"
+              aria-controls="hero-city-list"
+              data-autocomplete="city"
+              data-autocomplete-target="#hero-city-list"
+            />
+            <!-- Dropdown -->
+            <div class="autocomplete-list" id="hero-city-list" role="listbox" aria-label="City suggestions"></div>
           </div>
 
-          <div class="price">${{ property.price }}</div>
+          <button type="submit" class="btn btn-primary" id="hero-search-btn">
+            <i class="ti ti-search" aria-hidden="true"></i> Search
+          </button>
+        </div>
+      </form>
 
-          <a
-            href="{% url 'property_detail' property.slug %}"
-            class="details-btn"
-          >
-            View Details
+      <!-- Popular tags -->
+      <div class="hero-tags">
+        <span class="hero-tags-label">Popular:</span>
+        <a href="{% url 'property_list' %}?city=New+York"  class="hero-tag">New York</a>
+        <a href="{% url 'property_list' %}?city=London"    class="hero-tag">London</a>
+        <a href="{% url 'property_list' %}?city=Dubai"     class="hero-tag">Dubai</a>
+        <a href="{% url 'property_list' %}?city=Paris"     class="hero-tag">Paris</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     STATS BAR
+══════════════════════════════════ -->
+<div class="stats-bar fade-in" aria-label="Platform statistics">
+  <div class="container">
+    <div class="stats-bar-inner">
+      <div class="stat-item">
+        <div class="stat-icon stat-icon-blue"><i class="ti ti-building-estate"></i></div>
+        <div class="stat-value">{{ total_properties }}<span>+</span></div>
+        <div class="stat-label">Verified Properties</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon stat-icon-green"><i class="ti ti-map-2"></i></div>
+        <div class="stat-value">Geo<span>·</span>Search</div>
+        <div class="stat-label">Powered by PostGIS</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon stat-icon-amber"><i class="ti ti-brain"></i></div>
+        <div class="stat-value">AI<span>·</span>Embed</div>
+        <div class="stat-label">Powered by pgvector</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon stat-icon-slate"><i class="ti ti-shield-check"></i></div>
+        <div class="stat-value">100<span>%</span></div>
+        <div class="stat-label">Verified Listings</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     FEATURED PROPERTIES
+══════════════════════════════════ -->
+<section class="section" id="featured">
+  <div class="container">
+    <div class="section-hd fade-in">
+      <div class="section-hd-inner">
+        <div>
+          <span class="section-eyebrow">Featured Listings</span>
+          <h2 class="section-title">Hand-Picked Properties</h2>
+          <p class="section-sub">Curated selections of our finest verified listings across prime locations.</p>
+        </div>
+        <a href="{% url 'property_list' %}" class="btn btn-outline" id="view-all-btn">
+          Browse All <i class="ti ti-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+
+    <div class="properties-grid">
+      {% for property in featured_properties %}
+      <article class="property-card fade-in">
+        <a href="{% url 'property_detail' property.slug %}" id="card-{{ property.slug }}" aria-label="View {{ property.title }}">
+          <!-- Image -->
+          <div class="pc-img">
+            {% if property.images.first %}
+              <img src="{{ property.images.first.image.url }}"
+                   alt="{{ property.images.first.alt_text|default:property.title }}"
+                   loading="lazy" />
+            {% else %}
+              <div class="pc-img-placeholder">
+                <i class="ti ti-building"></i>
+                <span>No photo yet</span>
+              </div>
+            {% endif %}
+            <div class="pc-img-overlay"></div>
+            <div class="pc-badges">
+              {% if property.is_featured %}<span class="badge badge-amber"><i class="ti ti-star-filled"></i> Featured</span>{% endif %}
+              <span class="badge badge-green"><i class="ti ti-shield-check"></i> Verified</span>
+            </div>
+          </div>
+          <!-- Body -->
+          <div class="pc-body">
+            {% if property.property_type %}<div class="pc-type">{{ property.property_type }}</div>{% endif %}
+            <div class="pc-title">{{ property.title }}</div>
+            <div class="pc-location">
+              <i class="ti ti-map-pin" aria-hidden="true"></i>
+              {% if property.location %}{{ property.location.city }}{% if property.location.country %}, {{ property.location.country }}{% endif %}{% else %}Location not specified{% endif %}
+            </div>
+            <div class="pc-divider"></div>
+            <div class="pc-footer">
+              <div class="pc-price">
+                ${{ property.price }}
+                <span class="unit">/ listing</span>
+              </div>
+              <div class="pc-meta">
+                {% if property.bedrooms %}<div class="pc-meta-item"><i class="ti ti-bed"></i> {{ property.bedrooms }}</div>{% endif %}
+                {% if property.bathrooms %}<div class="pc-meta-item"><i class="ti ti-bath"></i> {{ property.bathrooms }}</div>{% endif %}
+              </div>
+            </div>
+          </div>
+        </a>
+      </article>
+      {% empty %}
+      <div class="empty-featured">
+        <i class="ti ti-building-off"></i>
+        <p>No properties yet. <a href="/admin/property_app/property/add/" style="color:var(--brand-600)">Add one via admin →</a></p>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% if featured_properties %}
+    <div style="text-align:center;margin-top:48px" class="fade-in">
+      <a href="{% url 'property_list' %}" class="btn btn-outline btn-lg" id="browse-more-btn">
+        View All Properties <i class="ti ti-arrow-right"></i>
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     FEATURES STRIP
+══════════════════════════════════ -->
+<section class="features-strip">
+  <div class="container">
+    <div class="features-grid">
+      <div class="feature-item fade-in">
+        <div class="feature-icon fi-blue"><i class="ti ti-map-2"></i></div>
+        <div>
+          <div class="feature-title">Geo Spatial Search</div>
+          <div class="feature-desc">Find properties within a precise radius using PostGIS distance queries and polygon boundaries.</div>
+        </div>
+      </div>
+      <div class="feature-item fade-in">
+        <div class="feature-icon fi-green"><i class="ti ti-brain"></i></div>
+        <div>
+          <div class="feature-title">AI Semantic Search</div>
+          <div class="feature-desc">pgvector HNSW indexing enables blazing-fast cosine-similarity searches across 1536-dim embeddings.</div>
+        </div>
+      </div>
+      <div class="feature-item fade-in">
+        <div class="feature-icon fi-amber"><i class="ti ti-shield-check"></i></div>
+        <div>
+          <div class="feature-title">Verified Listings</div>
+          <div class="feature-desc">Every property is reviewed and verified before appearing on the platform for your peace of mind.</div>
+        </div>
+      </div>
+      <div class="feature-item fade-in">
+        <div class="feature-icon fi-slate"><i class="ti ti-api"></i></div>
+        <div>
+          <div class="feature-title">REST API Ready</div>
+          <div class="feature-desc">Built on Django REST framework with full GeoJSON support for seamless integrations.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     CTA BANNER
+══════════════════════════════════ -->
+<section class="section section-sm">
+  <div class="container">
+    <div class="cta-banner fade-in">
+      <div class="cta-inner">
+        <div class="cta-text">
+          <h2>Ready to list your property?</h2>
+          <p>Add your property to our verified platform and reach thousands of potential buyers using our spatial discovery engine.</p>
+        </div>
+        <div class="cta-actions">
+          <a href="/admin/property_app/property/add/" class="btn btn-white btn-lg" id="cta-list-btn">
+            <i class="ti ti-plus"></i> List a Property
+          </a>
+          <a href="{% url 'property_list' %}" class="btn btn-white-outline btn-lg" id="cta-browse-btn">
+            Browse Listings
           </a>
         </div>
-      </article>
-
-      {% empty %}
-
-      <p>No properties available.</p>
-
-      {% endfor %}
+      </div>
     </div>
   </div>
 </section>

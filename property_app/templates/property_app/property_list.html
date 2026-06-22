@@ -1,189 +1,259 @@
-{% comment %} {% extends "base.html" %} {% load static %} {% block title %} {%
-if request.GET.city %} Properties in {{ request.GET.city }} — NestQuest {% else
-%} Browse All Properties — NestQuest {% endif %} {% endblock %} {% block
-extra_css %} {% endcomment %}
-<link rel="stylesheet" href="{ 'property_app/css/property_list.css' %}" />
-{% comment %} {% endblock %} {% block content %} {% endcomment %}
-<div class="page-header">
-  <div class="page-header-inner">
-    {% if request.GET.city %}
-    <h1>Properties in {{ request.GET.city }}</h1>
-    <p>{{ paginator.count }} result{{ paginator.count|pluralize }} found</p>
-    {% else %}
-    <h1>Browse all properties</h1>
-    <p>
-      {{ paginator.count }} verified propert{{ paginator.count|pluralize:"y,ies"
-      }} available
-    </p>
-    {% endif %}
-  </div>
-</div>
+{% extends "property_app/base.html" %}
+{% load static %}
 
-<div class="search-bar" role="search">
-  <div class="search-bar-inner">
-    <form
-      method="get"
-      action="{% url 'property_list' %}"
-      style="display: flex; gap: 10px; align-items: center; flex: 1"
-    >
-      <div class="search-bar-input-wrap">
-        <i class="ti ti-map-pin" aria-hidden="true"></i>
-        <input
-          type="text"
-          name="city"
-          placeholder="Search by city…"
-          value="{{ request.GET.city }}"
-          autocomplete="off"
-          aria-label="Filter by city"
-        />
-      </div>
-      <button
-        type="submit"
-        class="btn btn-primary"
-        style="height: 40px; padding: 0 16px"
-      >
-        <i class="ti ti-search" aria-hidden="true"></i> Search
-      </button>
+{% block title %}
+  {% if request.GET.city %}Properties in {{ request.GET.city }}{% else %}Browse All Properties{% endif %} — PropertyPulse
+{% endblock %}
+
+{% block meta_description %}
+  {% if request.GET.city %}Find {{ paginator.count }} properties in {{ request.GET.city }} on PropertyPulse.{% else %}Browse {{ paginator.count }} verified properties with geo-search on PropertyPulse.{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'property_app/css/property_list.css' %}" />
+{% endblock %}
+
+{% block content %}
+
+<!-- ══════════════════════════════════
+     PAGE HEADER
+══════════════════════════════════ -->
+<div class="list-page-header">
+  <div class="container">
+    <nav class="list-page-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}">Home</a>
+      <i class="ti ti-chevron-right" aria-hidden="true"></i>
+      <span>Properties</span>
       {% if request.GET.city %}
-      <a
-        href="{% url 'property_list' %}"
-        class="btn btn-ghost"
-        style="height: 40px"
-      >
-        <i class="ti ti-x" aria-hidden="true"></i> Clear
-      </a>
+        <i class="ti ti-chevron-right" aria-hidden="true"></i>
+        <span>{{ request.GET.city }}</span>
       {% endif %}
-    </form>
-    {% if properties %}
-    <span class="results-meta"
-      >{{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ paginator.count
-      }}</span
-    >
+    </nav>
+
+    {% if request.GET.city %}
+      <h1 class="list-page-title">Properties in <em>{{ request.GET.city }}</em></h1>
+      <p class="list-page-sub">{{ paginator.count }} result{{ paginator.count|pluralize }} found</p>
+    {% else %}
+      <h1 class="list-page-title">Browse All Properties</h1>
+      <p class="list-page-sub">{{ paginator.count }} verified propert{{ paginator.count|pluralize:"y,ies" }} available</p>
     {% endif %}
   </div>
 </div>
 
-<div class="list-layout">
-  <div class="property-grid">
-    {% for property in properties %}
-    <a
-      href="{% url 'property_detail' slug=property.slug %}"
-      class="property-card"
-    >
-      <div class="property-card-image">
-        {% if property.image %}
-        <img
-          src="{{ property.image.url }}"
-          alt="{{ property.name }}"
-          loading="lazy"
-        />
-        {% else %}
-        <div class="property-card-image-placeholder">
-          <i class="ti ti-building" aria-hidden="true"></i>
-          <span>No photo yet</span>
+<!-- ══════════════════════════════════
+     STICKY FILTER BAR + AUTOCOMPLETE
+══════════════════════════════════ -->
+<div class="filter-bar">
+  <div class="container">
+    <div class="filter-bar-inner">
+
+      <!-- Search with autocomplete -->
+      <form
+        method="get"
+        action="{% url 'property_list' %}"
+        class="filter-form"
+        id="filter-form"
+        role="search"
+        autocomplete="off"
+      >
+        <div class="filter-autocomplete-wrap">
+          <i class="ti ti-map-pin filter-input-icon" aria-hidden="true"></i>
+          <input
+            id="filter-city-input"
+            class="filter-city-input"
+            type="text"
+            name="city"
+            placeholder="Filter by city…"
+            value="{{ request.GET.city }}"
+            autocomplete="off"
+            aria-label="Filter properties by city"
+            aria-autocomplete="list"
+            aria-controls="filter-city-list"
+            data-autocomplete="city"
+            data-autocomplete-target="#filter-city-list"
+          />
+          <!-- Dropdown list -->
+          <div class="autocomplete-list" id="filter-city-list" role="listbox" aria-label="City suggestions"></div>
         </div>
+
+        <button type="submit" class="btn btn-primary btn-sm" id="filter-search-btn">
+          <i class="ti ti-search" aria-hidden="true"></i> Search
+        </button>
+
+        {% if request.GET.city %}
+          <a href="{% url 'property_list' %}" class="btn btn-ghost btn-sm" id="filter-clear-btn">
+            <i class="ti ti-x" aria-hidden="true"></i> Clear
+          </a>
         {% endif %}
-        <div class="property-card-badge">
-          <span class="badge badge-green">
-            <i class="ti ti-shield-check" aria-hidden="true"></i> Verified
+      </form>
+
+      <!-- Result count -->
+      <div class="filter-bar-right">
+        {% if properties %}
+          <span class="results-count" aria-live="polite">
+            Showing <strong>{{ page_obj.start_index }}–{{ page_obj.end_index }}</strong> of <strong>{{ paginator.count }}</strong>
           </span>
-        </div>
+        {% endif %}
       </div>
 
-      <div class="property-card-body">
-        {% if property.property_type %}
-        <div class="property-card-type">
-          {{ property.get_property_type_display }}
-        </div>
-        {% endif %}
-        <div class="property-card-title">{{ property.name }}</div>
-        <div class="property-card-location">
-          <i class="ti ti-map-pin" aria-hidden="true"></i>
-          {% if property.location %} {{ property.location.city }}{% if
-          property.location.country %}, {{ property.location.country }}{% endif
-          %} {% else %} Location not specified {% endif %}
-        </div>
-        <div class="property-card-footer">
-          {% if property.price_per_night %}
-          <div class="property-card-price">
-            ${{ property.price_per_night }} <span>/ night</span>
-          </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     PROPERTY GRID
+══════════════════════════════════ -->
+<section class="list-layout">
+  <div class="container">
+
+    <div class="pl-grid">
+      {% for property in properties %}
+      <a
+        href="{% url 'property_detail' slug=property.slug %}"
+        class="pl-card fade-in"
+        id="pl-card-{{ property.slug }}"
+        aria-label="{{ property.title }}"
+      >
+        <!-- Image -->
+        <div class="pl-card-img">
+          {% if property.images.first %}
+            <img
+              src="{{ property.images.first.image.url }}"
+              alt="{{ property.images.first.alt_text|default:property.title }}"
+              loading="lazy"
+            />
           {% else %}
-          <div
-            class="property-card-price"
-            style="font-size: 1rem; font-weight: 500; color: var(--neutral-400)"
-          >
-            Contact for price
-          </div>
+            <div class="pl-img-placeholder">
+              <i class="ti ti-building" aria-hidden="true"></i>
+              <span>No photo yet</span>
+            </div>
           {% endif %}
-          <div class="property-card-meta">
-            {% if property.bedrooms %}
-            <div class="property-meta-item">
-              <i class="ti ti-bed" aria-hidden="true"></i> {{ property.bedrooms
-              }}
-            </div>
-            {% endif %} {% if property.bathrooms %}
-            <div class="property-meta-item">
-              <i class="ti ti-bath" aria-hidden="true"></i> {{
-              property.bathrooms }}
-            </div>
-            {% endif %} {% if property.max_guests %}
-            <div class="property-meta-item">
-              <i class="ti ti-users" aria-hidden="true"></i> {{
-              property.max_guests }}
-            </div>
+          <div class="pl-img-overlay"></div>
+          <div class="pl-card-badges">
+            {% if property.is_featured %}
+              <span class="badge badge-amber"><i class="ti ti-star-filled"></i> Featured</span>
+            {% endif %}
+            <span class="badge badge-green"><i class="ti ti-shield-check"></i> Verified</span>
+          </div>
+        </div>
+
+        <!-- Body -->
+        <div class="pl-card-body">
+          {% if property.property_type %}
+            <div class="pl-card-type">{{ property.property_type }}</div>
+          {% endif %}
+          <div class="pl-card-name">{{ property.title }}</div>
+          <div class="pl-card-location">
+            <i class="ti ti-map-pin" aria-hidden="true"></i>
+            {% if property.location %}
+              {{ property.location.city }}{% if property.location.country %}, {{ property.location.country }}{% endif %}
+            {% else %}
+              Location not specified
             {% endif %}
           </div>
+          <div class="pl-card-divider"></div>
+          <div class="pl-card-footer">
+            <div class="pl-card-price">
+              ${{ property.price }}
+              <span class="unit">/ listing</span>
+            </div>
+            <div class="pl-card-meta">
+              {% if property.bedrooms %}
+                <div class="pl-meta-item"><i class="ti ti-bed" aria-hidden="true"></i> {{ property.bedrooms }}</div>
+              {% endif %}
+              {% if property.bathrooms %}
+                <div class="pl-meta-item"><i class="ti ti-bath" aria-hidden="true"></i> {{ property.bathrooms }}</div>
+              {% endif %}
+              {% if property.area_sqft %}
+                <div class="pl-meta-item"><i class="ti ti-ruler-2" aria-hidden="true"></i> {{ property.area_sqft|floatformat:0 }}</div>
+              {% endif %}
+            </div>
+          </div>
         </div>
-      </div>
-    </a>
-    {% empty %}
-    <div class="empty-state">
-      <div class="empty-state-icon">
-        <i class="ti ti-building-off" aria-hidden="true"></i>
-      </div>
-      <h3>No properties found</h3>
-      <p>
-        {% if request.GET.city %} We couldn't find any properties in
-        <strong>{{ request.GET.city }}</strong>. {% else %} No properties are
-        listed yet. {% endif %}
-      </p>
-      <a href="{% url 'property_list' %}" class="btn btn-outline"
-        >Browse all properties</a
-      >
-    </div>
-    {% endfor %}
-  </div>
+      </a>
 
-  {% if is_paginated %}
-  <nav class="pagination" aria-label="Page navigation">
-    {% if page_obj.has_previous %}
-    <a
-      class="page-link"
-      href="?{% if request.GET.city %}city={{ request.GET.city }}&{% endif %}page={{ page_obj.previous_page_number }}"
-    >
-      <i class="ti ti-chevron-left" aria-hidden="true"></i>
-    </a>
-    {% endif %} {% for num in paginator.page_range %} {% if page_obj.number ==
-    num %}
-    <span class="page-link active">{{ num }}</span>
-    {% comment %} {% elif num > page_obj.number|add:'-3' and num <
-    page_obj.number|add:'3' %} {% endcomment %}
-    <a
-      class="page-link"
-      href="?{% if request.GET.city %}city={{ request.GET.city }}&{% endif %}page={{ num }}"
-      >{{ num }}</a
-    >
-    {% comment %} {% endif %} {% endfor %} {% if page_obj.has_next %} {% comment
-    %} {% endcomment %}
-    <a
-      class="page-link"
-      href="?{% if request.GET.city %}city={{ request.GET.city }}&{% endif %}page={{ page_obj.next_page_number }}"
-    >
-      <i class="ti ti-chevron-right" aria-hidden="true"></i>
-    </a>
-    {% comment %} {% endif %} {% endcomment %} {% endcomment %}
-  </nav>
-  {% endif %}
-</div>
+      {% empty %}
+      <div class="pl-empty">
+        <div class="pl-empty-icon"><i class="ti ti-building-off" aria-hidden="true"></i></div>
+        <h3>No properties found</h3>
+        <p>
+          {% if request.GET.city %}
+            We couldn't find any properties in <strong>{{ request.GET.city }}</strong>.
+            Try a different city or browse all listings.
+          {% else %}
+            No properties have been listed yet. Check back soon or add one via the admin panel.
+          {% endif %}
+        </p>
+        {% if request.GET.city %}
+          <a href="{% url 'property_list' %}" class="btn btn-outline" id="browse-all-btn">
+            <i class="ti ti-list"></i> Browse All Properties
+          </a>
+        {% else %}
+          <a href="/admin/property_app/property/add/" class="btn btn-primary" id="add-property-admin-btn">
+            <i class="ti ti-plus"></i> Add a Property
+          </a>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- ══════════════════════════════
+         PAGINATION
+    ══════════════════════════════ -->
+    {% if is_paginated %}
+    <nav class="pagination" aria-label="Property pages">
+
+      <!-- Prev -->
+      {% if page_obj.has_previous %}
+        <a class="page-link"
+           href="?{% if request.GET.city %}city={{ request.GET.city }}&{% endif %}page={{ page_obj.previous_page_number }}"
+           aria-label="Previous page">
+          <i class="ti ti-chevron-left" aria-hidden="true"></i>
+        </a>
+      {% else %}
+        <span class="page-link disabled" aria-hidden="true"><i class="ti ti-chevron-left"></i></span>
+      {% endif %}
+
+      <!-- Page numbers -->
+      {% for num in paginator.page_range %}
+        {% if page_obj.number == num %}
+          <span class="page-link active" aria-current="page">{{ num }}</span>
+        {% elif num == 1 or num == paginator.num_pages %}
+          <a class="page-link"
+             href="?{% if request.GET.city %}city={{ request.GET.city }}&{% endif %}page={{ num }}">
+            {{ num }}
+          </a>
+        {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+          <a class="page-link"
+             href="?{% if request.GET.city %}city={{ request.GET.city }}&{% endif %}page={{ num }}">
+            {{ num }}
+          </a>
+        {% elif num == page_obj.number|add:"-3" or num == page_obj.number|add:"3" %}
+          <span class="page-ellipsis">…</span>
+        {% endif %}
+      {% endfor %}
+
+      <!-- Next -->
+      {% if page_obj.has_next %}
+        <a class="page-link"
+           href="?{% if request.GET.city %}city={{ request.GET.city }}&{% endif %}page={{ page_obj.next_page_number }}"
+           aria-label="Next page">
+          <i class="ti ti-chevron-right" aria-hidden="true"></i>
+        </a>
+      {% else %}
+        <span class="page-link disabled" aria-hidden="true"><i class="ti ti-chevron-right"></i></span>
+      {% endif %}
+
+    </nav>
+
+    <!-- Pagination info text -->
+    <p class="pagination-info">
+      Page {{ page_obj.number }} of {{ paginator.num_pages }} &mdash;
+      {{ paginator.count }} propert{{ paginator.count|pluralize:"y,ies" }} total
+    </p>
+    {% endif %}
+
+  </div>
+</section>
+
 {% endblock %}

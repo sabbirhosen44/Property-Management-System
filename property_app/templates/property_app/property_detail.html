@@ -1,185 +1,340 @@
-{% extends "base.html" %} {% load static %} {% block title %}{{ property.name }}
-— NestQuest{% endblock %} {% block meta_description %}{{ property.name }}{% if
-property.location %} in {{ property.location.city }}{% endif %}. Book directly
-on NestQuest.{% endblock %} {% block extra_css %}
-<link
-  rel="stylesheet"
-  href="{% static 'property_app/css/property_detail.css' %}"
-/>
-{% endblock %} {% block content %}
+{% extends "property_app/base.html" %}
+{% load static %}
 
-<!-- Breadcrumb -->
-<div class="breadcrumb">
-  <div class="breadcrumb-inner">
-    <a href="{% url 'home' %}">Home</a>
-    <i class="ti ti-chevron-right" aria-hidden="true"></i>
-    <a href="{% url 'property_list' %}">Properties</a>
-    {% if property.location %}
-    <i class="ti ti-chevron-right" aria-hidden="true"></i>
-    <a href="{% url 'property_list' %}?city={{ property.location.city }}"
-      >{{ property.location.city }}</a
-    >
-    {% endif %}
-    <i class="ti ti-chevron-right" aria-hidden="true"></i>
-    <span>{{ property.name }}</span>
-  </div>
-</div>
+{% block title %}{{ property.title }} — PropertyPulse{% endblock %}
 
-<!-- Main detail layout -->
-<div class="detail-layout">
-  <!-- Left: main content -->
-  <div class="detail-main">
-    <!-- Gallery -->
-    <div class="gallery">
-      {% if property.image %}
-      <img src="{{ property.image.url }}" alt="{{ property.name }}" />
-      {% else %}
-      <div class="gallery-placeholder">
-        <i class="ti ti-building" aria-hidden="true"></i>
-        <span>No photos available</span>
-      </div>
+{% block meta_description %}{{ property.title }}{% if property.location %} in {{ property.location.city }}, {{ property.location.country }}{% endif %}. {{ property.description|truncatewords:20 }} Browse on PropertyPulse.{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'property_app/css/property_detail.css' %}" />
+{% endblock %}
+
+{% block content %}
+
+<!-- ══════════════════════════════════
+     BREADCRUMB
+══════════════════════════════════ -->
+<nav class="detail-breadcrumb" aria-label="Breadcrumb">
+  <div class="container">
+    <div class="detail-breadcrumb-inner">
+      <a href="{% url 'home' %}">Home</a>
+      <i class="ti ti-chevron-right" aria-hidden="true"></i>
+      <a href="{% url 'property_list' %}">Properties</a>
+      {% if property.location %}
+        <i class="ti ti-chevron-right" aria-hidden="true"></i>
+        <a href="{% url 'property_list' %}?city={{ property.location.city }}">{{ property.location.city }}</a>
       {% endif %}
+      <i class="ti ti-chevron-right" aria-hidden="true"></i>
+      <span>{{ property.title }}</span>
     </div>
+  </div>
+</nav>
 
-    <!-- Title block -->
-    {% if property.property_type %}
-    <div class="detail-type">{{ property.get_property_type_display }}</div>
-    {% endif %}
-    <h1 class="detail-title">{{ property.name }}</h1>
-    <div class="detail-location">
+<!-- ══════════════════════════════════
+     GALLERY / HERO IMAGE
+══════════════════════════════════ -->
+<div class="detail-gallery">
+  {% if property.images.first %}
+    <img
+      src="{{ property.images.first.image.url }}"
+      alt="{{ property.images.first.alt_text|default:property.title }}"
+      loading="eager"
+    />
+    <div class="gallery-overlay"></div>
+  {% else %}
+    <div class="gallery-placeholder">
+      <i class="ti ti-building" aria-hidden="true"></i>
+      <span>No photos available</span>
+    </div>
+  {% endif %}
+
+  <!-- Title overlay on gallery -->
+  {% if property.images.first %}
+  <div class="gallery-title-overlay">
+    <div class="gallery-badges">
+      {% if property.is_featured %}
+        <span class="badge badge-gold"><i class="ti ti-star-filled"></i> Featured</span>
+      {% endif %}
+      {% if property.status %}
+        <span class="badge badge-blue">{{ property.status }}</span>
+      {% endif %}
+      <span class="badge badge-green"><i class="ti ti-shield-check"></i> Verified</span>
+    </div>
+    <h1 class="gallery-title">{{ property.title }}</h1>
+    <div class="gallery-location">
       <i class="ti ti-map-pin" aria-hidden="true"></i>
-      {% if property.location %} {{ property.location.address }}{% if
-      property.location.city %}, {{ property.location.city }}{% endif %}{% if
-      property.location.country %}, {{ property.location.country }}{% endif %}
-      {% else %} Location not specified {% endif %} {% if distance %}
-      &nbsp;·&nbsp; {{ distance }} km from city centre {% endif %}
-    </div>
-
-    <!-- Quick highlights -->
-    <div class="detail-highlights">
-      {% if property.bedrooms %}
-      <div class="highlight-item">
-        <i class="ti ti-bed" aria-hidden="true"></i>
-        {{ property.bedrooms }} bedroom{{ property.bedrooms|pluralize }}
-      </div>
-      {% endif %} {% if property.bathrooms %}
-      <div class="highlight-item">
-        <i class="ti ti-bath" aria-hidden="true"></i>
-        {{ property.bathrooms }} bathroom{{ property.bathrooms|pluralize }}
-      </div>
-      {% endif %} {% if property.max_guests %}
-      <div class="highlight-item">
-        <i class="ti ti-users" aria-hidden="true"></i>
-        Up to {{ property.max_guests }} guest{{ property.max_guests|pluralize }}
-      </div>
-      {% endif %} {% if property.area %}
-      <div class="highlight-item">
-        <i class="ti ti-ruler-2" aria-hidden="true"></i>
-        {{ property.area }} m²
-      </div>
+      {% if property.location %}
+        {{ property.location.address|default:'' }}{% if property.location.city %} {{ property.location.city }}{% endif %}{% if property.location.country %}, {{ property.location.country }}{% endif %}
+      {% else %}
+        Location not specified
       {% endif %}
-      <div class="highlight-item">
-        <i class="ti ti-shield-check" aria-hidden="true"></i>
-        <span class="badge badge-green">Verified listing</span>
-      </div>
-    </div>
-
-    <!-- Description -->
-    {% if property.description %}
-    <div class="detail-section">
-      <h2 class="detail-section-title">About this property</h2>
-      <p>{{ property.description }}</p>
-    </div>
-    {% endif %}
-
-    <!-- Amenities -->
-    {% if property.amenities %}
-    <div class="detail-section">
-      <h2 class="detail-section-title">Amenities</h2>
-      <div class="amenities-grid">
-        {% for amenity in property.amenities %}
-        <div class="amenity-item">
-          <i class="ti ti-check" aria-hidden="true"></i>
-          {{ amenity }}
-        </div>
-        {% endfor %}
-      </div>
-    </div>
-    {% endif %}
-
-    <!-- Map -->
-    <div class="detail-section map-section">
-      <h2 class="detail-section-title">Location</h2>
-      <div class="map-placeholder">
-        <div class="map-placeholder-inner">
-          <i class="ti ti-map" aria-hidden="true"></i>
-          <span>Map view coming soon</span>
-        </div>
-      </div>
+      {% if distance %}
+        <span class="distance-badge">
+          <i class="ti ti-location"></i>
+          {{ distance }} km from centre
+        </span>
+      {% endif %}
     </div>
   </div>
-
-  <!-- Right: booking card -->
-  <aside>
-    <div class="booking-card">
-      <div class="booking-card-header">
-        {% if property.price_per_night %}
-        <div class="booking-price">
-          ${{ property.price_per_night }} <span>/ night</span>
-        </div>
-        {% else %}
-        <div
-          class="booking-price"
-          style="font-size: 1.2rem; color: var(--neutral-400)"
-        >
-          Contact for pricing
-        </div>
-        {% endif %}
-      </div>
-
-      <div class="booking-card-body">
-        {% if property.location %}
-        <div class="booking-info-row">
-          <span class="booking-info-label">Location</span>
-          <span class="booking-info-value">{{ property.location.city }}</span>
-        </div>
-        {% endif %} {% if property.bedrooms %}
-        <div class="booking-info-row">
-          <span class="booking-info-label">Bedrooms</span>
-          <span class="booking-info-value">{{ property.bedrooms }}</span>
-        </div>
-        {% endif %} {% if property.max_guests %}
-        <div class="booking-info-row">
-          <span class="booking-info-label">Max guests</span>
-          <span class="booking-info-value">{{ property.max_guests }}</span>
-        </div>
-        {% endif %} {% if property.property_type %}
-        <div class="booking-info-row">
-          <span class="booking-info-label">Property type</span>
-          <span class="booking-info-value"
-            >{{ property.get_property_type_display }}</span
-          >
-        </div>
-        {% endif %}
-      </div>
-
-      <div class="booking-actions">
-        <button type="button" class="btn btn-primary">
-          <i class="ti ti-calendar" aria-hidden="true"></i>
-          Check availability
-        </button>
-        <button type="button" class="btn btn-outline">
-          <i class="ti ti-message" aria-hidden="true"></i>
-          Contact host
-        </button>
-      </div>
-
-      <p class="booking-note">
-        <i class="ti ti-shield-check" aria-hidden="true"></i>
-        Secure booking — no charges yet
-      </p>
-    </div>
-  </aside>
+  {% endif %}
 </div>
 
+<!-- ══════════════════════════════════
+     DETAIL BODY
+══════════════════════════════════ -->
+<div class="detail-wrap">
+  <div class="container">
+
+    <!-- When no gallery image, show title block here -->
+    {% if not property.images.first %}
+    <div style="margin-bottom: 40px;">
+      <div class="gallery-badges" style="margin-bottom:14px;">
+        {% if property.is_featured %}
+          <span class="badge badge-gold"><i class="ti ti-star-filled"></i> Featured</span>
+        {% endif %}
+        {% if property.status %}
+          <span class="badge badge-blue">{{ property.status }}</span>
+        {% endif %}
+        <span class="badge badge-green"><i class="ti ti-shield-check"></i> Verified</span>
+      </div>
+      <h1 style="font-family:var(--serif);font-size:clamp(26px,4vw,42px);font-weight:700;color:var(--text-primary);letter-spacing:-0.025em;margin-bottom:10px;">{{ property.title }}</h1>
+      <div class="gallery-location" style="color:var(--text-secondary);">
+        <i class="ti ti-map-pin" style="color:var(--brand-500)"></i>
+        {% if property.location %}
+          {{ property.location.address|default:'' }}{% if property.location.city %} {{ property.location.city }}{% endif %}{% if property.location.country %}, {{ property.location.country }}{% endif %}
+        {% else %}
+          Location not specified
+        {% endif %}
+        {% if distance %}
+          <span class="distance-badge">
+            <i class="ti ti-location"></i>{{ distance }} km from centre
+          </span>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="detail-layout">
+
+      <!-- ── LEFT: MAIN CONTENT ── -->
+      <div class="detail-main">
+
+        <!-- Property type -->
+        {% if property.property_type %}
+          <div class="detail-type-pill">
+            <i class="ti ti-tag" aria-hidden="true"></i>
+            {{ property.property_type }}
+          </div>
+        {% endif %}
+
+        <!-- Quick specs strip -->
+        <div class="detail-specs">
+          {% if property.bedrooms %}
+          <div class="detail-spec">
+            <i class="ti ti-bed detail-spec-icon" aria-hidden="true"></i>
+            <span class="detail-spec-label">Bedrooms</span>
+            <span class="detail-spec-value">{{ property.bedrooms }}</span>
+          </div>
+          {% endif %}
+          {% if property.bathrooms %}
+          <div class="detail-spec">
+            <i class="ti ti-bath detail-spec-icon" aria-hidden="true"></i>
+            <span class="detail-spec-label">Bathrooms</span>
+            <span class="detail-spec-value">{{ property.bathrooms }}</span>
+          </div>
+          {% endif %}
+          {% if property.area_sqft %}
+          <div class="detail-spec">
+            <i class="ti ti-ruler-2 detail-spec-icon" aria-hidden="true"></i>
+            <span class="detail-spec-label">Area</span>
+            <span class="detail-spec-value">{{ property.area_sqft|floatformat:0 }} ft²</span>
+          </div>
+          {% endif %}
+          {% if property.location %}
+          <div class="detail-spec">
+            <i class="ti ti-map-pin detail-spec-icon" aria-hidden="true"></i>
+            <span class="detail-spec-label">City</span>
+            <span class="detail-spec-value">{{ property.location.city }}</span>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Description -->
+        {% if property.description %}
+        <div class="detail-section fade-in">
+          <h2 class="detail-section-title">About this property</h2>
+          <p>{{ property.description }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Amenities (from address field if present) -->
+        {% if property.address %}
+        <div class="detail-section fade-in">
+          <h2 class="detail-section-title">Full Address</h2>
+          <div class="amenity-item" style="max-width:400px;">
+            <i class="ti ti-home-2"></i>
+            {{ property.address }}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Location info -->
+        {% if property.location %}
+        <div class="detail-section fade-in">
+          <h2 class="detail-section-title">Location Details</h2>
+          <div class="amenities-grid">
+            {% if property.location.name %}
+            <div class="amenity-item">
+              <i class="ti ti-map"></i>
+              {{ property.location.name }}
+            </div>
+            {% endif %}
+            {% if property.location.address %}
+            <div class="amenity-item">
+              <i class="ti ti-map-pin"></i>
+              {{ property.location.address }}
+            </div>
+            {% endif %}
+            {% if property.location.city %}
+            <div class="amenity-item">
+              <i class="ti ti-building-community"></i>
+              {{ property.location.city }}{% if property.location.state %}, {{ property.location.state }}{% endif %}
+            </div>
+            {% endif %}
+            {% if property.location.country %}
+            <div class="amenity-item">
+              <i class="ti ti-flag"></i>
+              {{ property.location.country }}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Map placeholder -->
+        <div class="detail-section fade-in">
+          <h2 class="detail-section-title">Map &amp; Surroundings</h2>
+          <div class="map-placeholder">
+            <i class="ti ti-map-2" aria-hidden="true"></i>
+            <span>Interactive Map</span>
+            <small>GeoDjango + PostGIS spatial view coming soon</small>
+          </div>
+        </div>
+
+      </div><!-- /.detail-main -->
+
+      <!-- ── RIGHT: BOOKING SIDEBAR ── -->
+      <aside class="detail-sidebar">
+        <div class="booking-card">
+          <!-- Header: price -->
+          <div class="booking-card-header">
+            {% if property.price %}
+              <div class="booking-price-display">
+                <span class="booking-price-amount">${{ property.price }}</span>
+                <span class="booking-price-unit">listing price</span>
+              </div>
+              <div class="booking-price-note">All prices in USD</div>
+            {% else %}
+              <div class="booking-contact-price">Contact for pricing</div>
+            {% endif %}
+          </div>
+
+          <!-- Body: info rows -->
+          <div class="booking-card-body">
+            {% if property.property_type %}
+            <div class="booking-info-row">
+              <span class="booking-info-label">
+                <i class="ti ti-tag" aria-hidden="true"></i> Type
+              </span>
+              <span class="booking-info-value">{{ property.property_type }}</span>
+            </div>
+            {% endif %}
+            {% if property.status %}
+            <div class="booking-info-row">
+              <span class="booking-info-label">
+                <i class="ti ti-info-circle" aria-hidden="true"></i> Status
+              </span>
+              <span class="booking-info-value">{{ property.status }}</span>
+            </div>
+            {% endif %}
+            {% if property.location %}
+            <div class="booking-info-row">
+              <span class="booking-info-label">
+                <i class="ti ti-map-pin" aria-hidden="true"></i> Location
+              </span>
+              <span class="booking-info-value">{{ property.location.city }}</span>
+            </div>
+            {% endif %}
+            {% if property.bedrooms %}
+            <div class="booking-info-row">
+              <span class="booking-info-label">
+                <i class="ti ti-bed" aria-hidden="true"></i> Bedrooms
+              </span>
+              <span class="booking-info-value">{{ property.bedrooms }}</span>
+            </div>
+            {% endif %}
+            {% if property.bathrooms %}
+            <div class="booking-info-row">
+              <span class="booking-info-label">
+                <i class="ti ti-bath" aria-hidden="true"></i> Bathrooms
+              </span>
+              <span class="booking-info-value">{{ property.bathrooms }}</span>
+            </div>
+            {% endif %}
+            {% if property.area_sqft %}
+            <div class="booking-info-row">
+              <span class="booking-info-label">
+                <i class="ti ti-ruler-2" aria-hidden="true"></i> Area
+              </span>
+              <span class="booking-info-value">{{ property.area_sqft|floatformat:0 }} ft²</span>
+            </div>
+            {% endif %}
+            {% if distance %}
+            <div class="booking-info-row">
+              <span class="booking-info-label">
+                <i class="ti ti-location" aria-hidden="true"></i> Distance
+              </span>
+              <span class="booking-info-value">{{ distance }} km</span>
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Actions -->
+          <div class="booking-actions">
+            <button type="button" class="btn btn-primary" id="check-availability-btn">
+              <i class="ti ti-calendar" aria-hidden="true"></i>
+              Check Availability
+            </button>
+            <button type="button" class="btn btn-outline" id="contact-host-btn">
+              <i class="ti ti-message" aria-hidden="true"></i>
+              Contact Host
+            </button>
+          </div>
+
+          <p class="booking-note">
+            <i class="ti ti-shield-check" aria-hidden="true"></i>
+            Secure listing — verified by PropertyPulse
+          </p>
+        </div>
+      </aside>
+
+    </div><!-- /.detail-layout -->
+  </div><!-- /.container -->
+</div><!-- /.detail-wrap -->
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Fade-in for detail sections
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
 {% endblock %}
