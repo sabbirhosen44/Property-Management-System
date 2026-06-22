@@ -1,4 +1,4 @@
-from django.contrib import admin
+from django.contrib.gis import admin
 from django.utils.html import format_html
 
 from .models import (
@@ -36,7 +36,7 @@ class PropertyImageInline(admin.TabularInline):
 
 
 @admin.register(Location)
-class LocationAdmin(admin.ModelAdmin):
+class LocationAdmin(admin.GISModelAdmin):
 
     list_display = (
         "name",
@@ -70,7 +70,18 @@ class LocationAdmin(admin.ModelAdmin):
 
 
 @admin.register(Property)
-class PropertyAdmin(admin.ModelAdmin):
+class PropertyAdmin(admin.GISModelAdmin):
+
+    list_display = (
+        "title",
+        "property_type",
+        "status",
+        "price",
+        "bedrooms",
+        "bathrooms",
+        "is_featured",
+        "is_active",
+    )
 
     list_display = (
         "title",
