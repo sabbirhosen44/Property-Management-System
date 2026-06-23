@@ -105,7 +105,7 @@
       </div>
 
       <div class="footer-bottom">
-        <p>&copy; 2024 PropertyPulse. All rights reserved.</p>
+        <p>&copy; 2026 PropertyPulse. All rights reserved.</p>
         <div class="footer-bottom-links">
           <a href="#">Privacy Policy</a>
           <a href="#">Terms of Service</a>
@@ -157,7 +157,7 @@
     // ══════════════════════════════════════
     //  CITY AUTOCOMPLETE — shared utility
     // ══════════════════════════════════════
-    function initCityAutocomplete(inputEl, listEl) {
+    {% comment %} function initCityAutocomplete(inputEl, listEl) {
       if (!inputEl || !listEl) return;
 
       let activeFocusIdx = -1;
@@ -287,7 +287,140 @@
       inputEl.addEventListener('focus', () => {
         if (inputEl.value.trim().length >= 1) inputEl.dispatchEvent(new Event('input'));
       });
+    } {% endcomment %}
+
+
+    function initCityAutocomplete(inputEl, listEl, onSelectExtra) {
+  if (!inputEl || !listEl) return;
+ 
+  let activeFocusIdx = -1;
+  let lastQuery = '';
+  let debounceTimer;
+ 
+  function renderItems(results) {
+    listEl.innerHTML = '';
+    activeFocusIdx = -1;
+ 
+    if (!results.length) {
+      listEl.innerHTML = '<div class="autocomplete-empty">No suggestions found</div>';
+      listEl.classList.add('open');
+      return;
     }
+ 
+    results.forEach((item, idx) => {
+      const div = document.createElement('div');
+      div.className = `autocomplete-item type-${item.type}`;
+      div.setAttribute('role', 'option');
+      div.setAttribute('data-value', item.value);
+      div.setAttribute('data-type', item.type);
+      if (item.url)  div.setAttribute('data-url',  item.url);
+      if (item.lat !== undefined) div.setAttribute('data-lat', item.lat);
+      if (item.lng !== undefined) div.setAttribute('data-lng', item.lng);
+ 
+      const icon       = item.type === 'property' ? 'ti-building' : 'ti-map-pin';
+      const badgeLabel = item.type === 'property' ? 'Property'    : 'Location';
+ 
+      div.innerHTML = `
+        <i class="ti ${icon}" aria-hidden="true"></i>
+        <div class="autocomplete-info">
+          <span class="autocomplete-title">${item.display}</span>
+          <span class="autocomplete-subtitle">${item.subtitle}</span>
+        </div>
+        <span class="autocomplete-badge">${badgeLabel}</span>
+      `;
+      div.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        selectItem(item);
+      });
+      listEl.appendChild(div);
+    });
+ 
+    listEl.classList.add('open');
+  }
+ 
+  function closeList() {
+    listEl.classList.remove('open');
+    listEl.innerHTML = '';
+    activeFocusIdx = -1;
+  }
+ 
+  function selectItem(item) {
+    // Fire optional hook first (e.g. populate lat/lng inputs)
+    if (typeof onSelectExtra === 'function') onSelectExtra(item);
+ 
+    if (item.type === 'property' && item.url) {
+      window.location.href = item.url;
+    } else {
+      inputEl.value = item.value;
+      closeList();
+      const form = inputEl.closest('form');
+      if (form) form.submit();
+    }
+  }
+ 
+  function getItems() {
+    return listEl.querySelectorAll('.autocomplete-item');
+  }
+ 
+  function setFocus(idx) {
+    const items = getItems();
+    items.forEach(i => i.classList.remove('focused'));
+    activeFocusIdx = idx;
+    if (idx >= 0 && idx < items.length) {
+      items[idx].classList.add('focused');
+      items[idx].scrollIntoView({ block: 'nearest' });
+    }
+  }
+ 
+  inputEl.addEventListener('input', () => {
+    const q = inputEl.value.trim();
+    if (q === lastQuery) return;
+    lastQuery = q;
+    clearTimeout(debounceTimer);
+    if (q.length < 1) { closeList(); return; }
+ 
+    debounceTimer = setTimeout(async () => {
+      try {
+        const res  = await fetch(`/api/cities/?q=${encodeURIComponent(q)}`);
+        const data = await res.json();
+        renderItems(data.results || []);
+      } catch {
+        closeList();
+      }
+    }, 220);
+  });
+ 
+  inputEl.addEventListener('keydown', (e) => {
+    const items = getItems();
+    if (!items.length) return;
+ 
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setFocus(Math.min(activeFocusIdx + 1, items.length - 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setFocus(Math.max(activeFocusIdx - 1, 0));
+    } else if (e.key === 'Enter' && activeFocusIdx >= 0) {
+      e.preventDefault();
+      const target = items[activeFocusIdx];
+      selectItem({
+        type:  target.dataset.type,
+        value: target.dataset.value,
+        url:   target.dataset.url,
+        lat:   target.dataset.lat !== undefined ? parseFloat(target.dataset.lat) : undefined,
+        lng:   target.dataset.lng !== undefined ? parseFloat(target.dataset.lng) : undefined,
+      });
+    } else if (e.key === 'Escape') {
+      closeList();
+    }
+  });
+ 
+  inputEl.addEventListener('blur',  () => setTimeout(closeList, 150));
+  inputEl.addEventListener('focus', () => {
+    if (inputEl.value.trim().length >= 1) inputEl.dispatchEvent(new Event('input'));
+  });
+}
+ 
 
     // Auto-init all autocomplete instances on the page
     document.addEventListener('DOMContentLoaded', () => {

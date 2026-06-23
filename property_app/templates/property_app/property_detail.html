@@ -7,6 +7,89 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'property_app/css/property_detail.css' %}" />
+<style>
+/* ── Distance from city centre card ── */
+.distance-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border: 1px solid #bfdbfe;
+  border-radius: 14px;
+  padding: 18px 22px;
+  margin-bottom: 28px;
+}
+.distance-card-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--brand-600, #2563eb);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 22px;
+}
+.distance-card-body { flex: 1; min-width: 0; }
+.distance-card-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--brand-500, #3b82f6);
+  margin-bottom: 3px;
+}
+.distance-card-value {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--brand-700, #1d4ed8);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.distance-card-sub {
+  font-size: 12px;
+  color: var(--brand-500, #3b82f6);
+  margin-top: 3px;
+}
+.distance-card-pill {
+  flex-shrink: 0;
+  background: var(--brand-100, #dbeafe);
+  border: 1px solid var(--brand-200, #bfdbfe);
+  color: var(--brand-700, #1d4ed8);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ── Distance badge in gallery overlay ── */
+.distance-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(37,99,235,0.85);
+  backdrop-filter: blur(4px);
+  color: #fff;
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.distance-badge i { font-size: 12px; }
+
+/* ── Distance row in booking sidebar ── */
+.booking-distance-highlight {
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  border-color: #bfdbfe !important;
+}
+.booking-distance-highlight .booking-info-label,
+.booking-distance-highlight .booking-info-value {
+  color: var(--brand-700, #1d4ed8) !important;
+  font-weight: 700 !important;
+}
+</style>
 {% endblock %}
 
 {% block content %}
@@ -59,6 +142,12 @@
         <span class="badge badge-blue">{{ property.status }}</span>
       {% endif %}
       <span class="badge badge-green"><i class="ti ti-shield-check"></i> Verified</span>
+      {% if distance %}
+        <span class="distance-badge">
+          <i class="ti ti-map-pin-bolt"></i>
+          {{ distance }} km from city centre
+        </span>
+      {% endif %}
     </div>
     <h1 class="gallery-title">{{ property.title }}</h1>
     <div class="gallery-location">
@@ -67,12 +156,6 @@
         {{ property.location.address|default:'' }}{% if property.location.city %} {{ property.location.city }}{% endif %}{% if property.location.country %}, {{ property.location.country }}{% endif %}
       {% else %}
         Location not specified
-      {% endif %}
-      {% if distance %}
-        <span class="distance-badge">
-          <i class="ti ti-location"></i>
-          {{ distance }} km from centre
-        </span>
       {% endif %}
     </div>
   </div>
@@ -105,11 +188,6 @@
         {% else %}
           Location not specified
         {% endif %}
-        {% if distance %}
-          <span class="distance-badge">
-            <i class="ti ti-location"></i>{{ distance }} km from centre
-          </span>
-        {% endif %}
       </div>
     </div>
     {% endif %}
@@ -118,6 +196,26 @@
 
       <!-- ── LEFT: MAIN CONTENT ── -->
       <div class="detail-main">
+
+        <!-- Distance from city centre card (prominent) -->
+        {% if distance %}
+        <div class="distance-card fade-in" role="region" aria-label="Distance from city centre">
+          <div class="distance-card-icon">
+            <i class="ti ti-map-pin-bolt" aria-hidden="true"></i>
+          </div>
+          <div class="distance-card-body">
+            <div class="distance-card-label">Distance from city centre</div>
+            <div class="distance-card-value">{{ distance }} km</div>
+            <div class="distance-card-sub">
+              from {{ property.location.city }} city centre
+            </div>
+          </div>
+          <div class="distance-card-pill">
+            <i class="ti ti-location" aria-hidden="true"></i>
+            Geo verified
+          </div>
+        </div>
+        {% endif %}
 
         <!-- Property type -->
         {% if property.property_type %}
@@ -157,6 +255,13 @@
             <span class="detail-spec-value">{{ property.location.city }}</span>
           </div>
           {% endif %}
+          {% if distance %}
+          <div class="detail-spec">
+            <i class="ti ti-location detail-spec-icon" aria-hidden="true" style="color:var(--brand-500)"></i>
+            <span class="detail-spec-label">Distance</span>
+            <span class="detail-spec-value" style="color:var(--brand-600);font-weight:700;">{{ distance }} km</span>
+          </div>
+          {% endif %}
         </div>
 
         <!-- Description -->
@@ -167,7 +272,7 @@
         </div>
         {% endif %}
 
-        <!-- Amenities (from address field if present) -->
+        <!-- Full address -->
         {% if property.address %}
         <div class="detail-section fade-in">
           <h2 class="detail-section-title">Full Address</h2>
@@ -210,16 +315,6 @@
           </div>
         </div>
         {% endif %}
-
-        <!-- Map placeholder -->
-        <div class="detail-section fade-in">
-          <h2 class="detail-section-title">Map &amp; Surroundings</h2>
-          <div class="map-placeholder">
-            <i class="ti ti-map-2" aria-hidden="true"></i>
-            <span>Interactive Map</span>
-            <small>GeoDjango + PostGIS spatial view coming soon</small>
-          </div>
-        </div>
 
       </div><!-- /.detail-main -->
 
@@ -289,10 +384,12 @@
               <span class="booking-info-value">{{ property.area_sqft|floatformat:0 }} ft²</span>
             </div>
             {% endif %}
+
+            <!-- Distance — highlighted row -->
             {% if distance %}
-            <div class="booking-info-row">
+            <div class="booking-info-row booking-distance-highlight">
               <span class="booking-info-label">
-                <i class="ti ti-location" aria-hidden="true"></i> Distance
+                <i class="ti ti-map-pin-bolt" aria-hidden="true"></i> City centre
               </span>
               <span class="booking-info-value">{{ distance }} km</span>
             </div>
@@ -311,6 +408,21 @@
             </button>
           </div>
 
+          <!-- Nearby search CTA -->
+          {% if property.point %}
+          <div style="margin-top:12px;">
+            <a
+              href="{% url 'property_list' %}?lat={{ property.point.y }}&lng={{ property.point.x }}&radius=10"
+              class="btn btn-outline"
+              style="width:100%;justify-content:center;"
+              id="nearby-search-btn"
+            >
+              <i class="ti ti-map-search" aria-hidden="true"></i>
+              Find Nearby Properties
+            </a>
+          </div>
+          {% endif %}
+
           <p class="booking-note">
             <i class="ti ti-shield-check" aria-hidden="true"></i>
             Secure listing — verified by PropertyPulse
@@ -326,7 +438,6 @@
 
 {% block extra_js %}
 <script>
-  // Fade-in for detail sections
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(e => {
       if (e.isIntersecting) {

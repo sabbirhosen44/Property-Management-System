@@ -2,37 +2,152 @@
 {% load static %}
 
 {% block title %}
-  {% if request.GET.city %}Properties in {{ request.GET.city }}{% else %}Browse All Properties{% endif %} — PropertyPulse
+  {% if city_q %}Properties in {{ city_q }}
+  {% elif geo_active %}Properties Near You
+  {% else %}Browse All Properties
+  {% endif %} — PropertyPulse
 {% endblock %}
 
 {% block meta_description %}
-  {% if request.GET.city %}Find {{ paginator.count }} properties in {{ request.GET.city }} on PropertyPulse.{% else %}Browse {{ paginator.count }} verified properties with geo-search on PropertyPulse.{% endif %}
+  {% if city_q %}Find {{ paginator.count }} properties in {{ city_q }} on PropertyPulse.
+  {% else %}Browse {{ paginator.count }} verified properties with geo-search on PropertyPulse.
+  {% endif %}
 {% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'property_app/css/property_list.css' %}" />
+<style>
+/* ── Geo Search Bar ── */
+.geo-bar {
+  background: linear-gradient(135deg, var(--brand-600, #2563eb) 0%, #1e40af 100%);
+  padding: 0;
+  overflow: visible;
+}
+.geo-bar-inner {
+  display: flex;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+.geo-panel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  flex: 1;
+  min-width: 180px;
+}
+.geo-panel-divider {
+  width: 1px;
+  background: rgba(255,255,255,0.2);
+  align-self: stretch;
+  margin: 10px 0;
+}
+.geo-icon {
+  flex-shrink: 0;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; color: #fff;
+}
+.geo-field-label {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: rgba(255,255,255,0.65); margin-bottom: 2px;
+}
+.geo-city-input {
+  background: transparent; border: none;
+  color: #fff; font-size: 14px; font-weight: 500;
+  width: 100%; outline: none; padding: 0;
+}
+.geo-city-input::placeholder { color: rgba(255,255,255,0.5); }
+.geo-radius-select {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: #fff; border-radius: 8px;
+  padding: 6px 10px; font-size: 13px; font-weight: 600;
+  cursor: pointer; outline: none;
+}
+.geo-radius-select option { color: #1e293b; background: #fff; }
+.geo-actions {
+  display: flex; align-items: center;
+  gap: 8px; padding: 14px 20px; flex-shrink: 0;
+}
+.geo-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 16px; border-radius: 8px;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all .18s;
+  border: none; white-space: nowrap; text-decoration: none;
+}
+.geo-btn-locate {
+  background: rgba(255,255,255,0.18); color: #fff;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+.geo-btn-locate:hover, .geo-btn-locate.active {
+  background: rgba(255,255,255,0.9); color: #1d4ed8;
+}
+.geo-btn-search { background: #fff; color: #1d4ed8; }
+.geo-btn-search:hover { background: #e0e7ff; }
+.geo-btn-clear {
+  background: transparent; color: rgba(255,255,255,0.75);
+  border: 1px solid rgba(255,255,255,0.3);
+}
+.geo-btn-clear:hover { color: #fff; border-color: #fff; }
+.geo-active-badge {
+  display: inline-flex; align-items: center;
+  background: rgba(74,222,128,0.2);
+  border: 1px solid rgba(74,222,128,0.4);
+  color: #bbf7d0; border-radius: 20px;
+  padding: 3px 10px; font-size: 11px; font-weight: 700;
+}
+.geo-status-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #4ade80; box-shadow: 0 0 6px #4ade80;
+  display: inline-block; margin-right: 5px;
+}
+
+/* ── Distance badge on cards ── */
+.pl-card-distance {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: #eff6ff; color: #2563eb;
+  border: 1px solid #bfdbfe; border-radius: 20px;
+  padding: 2px 9px; font-size: 11px; font-weight: 600; margin-top: 6px;
+}
+
+/* ── Geo error banner ── */
+.geo-error {
+  background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c;
+  border-radius: 8px; padding: 10px 16px; font-size: 13px;
+  display: none; align-items: center; gap: 8px; margin-bottom: 16px;
+}
+</style>
 {% endblock %}
 
 {% block content %}
 
-<!-- ══════════════════════════════════
-     PAGE HEADER
-══════════════════════════════════ -->
+<!-- PAGE HEADER -->
 <div class="list-page-header">
   <div class="container">
     <nav class="list-page-breadcrumb" aria-label="Breadcrumb">
       <a href="{% url 'home' %}">Home</a>
       <i class="ti ti-chevron-right" aria-hidden="true"></i>
       <span>Properties</span>
-      {% if request.GET.city %}
+      {% if city_q %}
         <i class="ti ti-chevron-right" aria-hidden="true"></i>
-        <span>{{ request.GET.city }}</span>
+        <span>{{ city_q }}</span>
+      {% elif geo_active %}
+        <i class="ti ti-chevron-right" aria-hidden="true"></i>
+        <span>Near You</span>
       {% endif %}
     </nav>
 
-    {% if request.GET.city %}
-      <h1 class="list-page-title">Properties in <em>{{ request.GET.city }}</em></h1>
+    {% if city_q %}
+      <h1 class="list-page-title">Properties in <em>{{ city_q }}</em></h1>
       <p class="list-page-sub">{{ paginator.count }} result{{ paginator.count|pluralize }} found</p>
+    {% elif geo_active %}
+      <h1 class="list-page-title">Properties <em>Near You</em></h1>
+      <p class="list-page-sub">{{ paginator.count }} propert{{ paginator.count|pluralize:"y,ies" }} within {{ radius_km }} km</p>
     {% else %}
       <h1 class="list-page-title">Browse All Properties</h1>
       <p class="list-page-sub">{{ paginator.count }} verified propert{{ paginator.count|pluralize:"y,ies" }} available</p>
@@ -40,70 +155,88 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════
-     STICKY FILTER BAR + AUTOCOMPLETE
-══════════════════════════════════ -->
-<div class="filter-bar">
+<!-- GEO SEARCH BAR -->
+<div class="geo-bar" id="geo-bar">
   <div class="container">
-    <div class="filter-bar-inner">
+    <form method="get" action="{% url 'property_list' %}" id="geo-form" autocomplete="off">
+      <input type="hidden" name="lat"  id="geo-lat"  value="{{ user_lat }}" />
+      <input type="hidden" name="lng"  id="geo-lng"  value="{{ user_lng }}" />
 
-      <!-- Search with autocomplete -->
-      <form
-        method="get"
-        action="{% url 'property_list' %}"
-        class="filter-form"
-        id="filter-form"
-        role="search"
-        autocomplete="off"
-      >
-        <div class="filter-autocomplete-wrap">
-          <input
-            id="filter-city-input"
-            class="filter-city-input"
-            type="text"
-            name="city"
-            placeholder="Filter by city…"
-            value="{{ request.GET.city }}"
-            autocomplete="off"
-            aria-label="Filter properties by city"
-            aria-autocomplete="list"
-            aria-controls="filter-city-list"
-            data-autocomplete="city"
-            data-autocomplete-target="#filter-city-list"
-          />
-          <!-- Dropdown list -->
-          <div class="autocomplete-list" id="filter-city-list" role="listbox" aria-label="City suggestions"></div>
+      <div class="geo-bar-inner">
+
+        <!-- City search -->
+        <div class="geo-panel">
+          <div style="flex:1;min-width:0;position:relative;">
+            <div class="geo-field-label">City or area</div>
+            <input
+              id="geo-city-input"
+              class="geo-city-input"
+              type="text"
+              name="city"
+              placeholder="Search city or area…"
+              value="{{ city_q }}"
+              autocomplete="off"
+              aria-label="City search"
+              aria-autocomplete="list"
+              aria-controls="geo-city-list"
+              data-autocomplete="city"
+              data-autocomplete-target="#geo-city-list"
+            />
+            <div class="autocomplete-list" id="geo-city-list" role="listbox"></div>
+          </div>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-sm" id="filter-search-btn">
-          <i class="ti ti-search" aria-hidden="true"></i> Search
-        </button>
+        <div class="geo-panel-divider"></div>
 
-        {% if request.GET.city %}
-          <a href="{% url 'property_list' %}" class="btn btn-ghost btn-sm" id="filter-clear-btn">
-            <i class="ti ti-x" aria-hidden="true"></i> Clear
-          </a>
-        {% endif %}
-      </form> 
+        <!-- Radius -->
+        <div class="geo-panel" style="flex:0 0 auto; ">
+          <div>
+            <div class="geo-field-label">Radius</div>
+            <select name="radius" class="geo-radius-select" id="geo-radius" aria-label="Search radius">
+              <option value="5"   {% if radius_km == 5   %}selected{% endif %}>5 km</option>
+              <option value="10"  {% if radius_km == 10  %}selected{% endif %}>10 km</option>
+              <option value="25"  {% if radius_km == 25  %}selected{% endif %}>25 km</option>
+              <option value="50"  {% if radius_km == 50  %}selected{% endif %}>50 km</option>
+              <option value="100" {% if radius_km == 100 %}selected{% endif %}>100 km</option>
+            </select>
+          </div>
+         
 
-      <!-- Result count -->
-      <div class="filter-bar-right">
-        {% if properties %}
-          <span class="results-count" aria-live="polite">
-            Showing <strong>{{ page_obj.start_index }}–{{ page_obj.end_index }}</strong> of <strong>{{ paginator.count }}</strong>
-          </span>
-        {% endif %}
+        <!-- Actions -->
+        <div class="geo-actions">
+          
+          <button type="button" class="geo-btn geo-btn-locate {% if geo_active %}active{% endif %}" id="geo-locate-btn">
+            <i class="ti ti-current-location"></i>
+            <span id="geo-locate-label">{% if geo_active %}Located ✓{% else %}Near Me{% endif %}</span>
+          </button>
+
+          {% if geo_active %}
+            <span class="geo-active-badge">
+              <span class="geo-status-dot"></span>Geo On
+            </span>
+          {% endif %}
+          {% if geo_active or city_q %}
+            <a href="{% url 'property_list' %}" class="geo-btn geo-btn-clear" title="Clear filters">
+              <i class="ti ti-x"></i>
+            </a>
+          {% endif %}
+        </div>
+        </div>
+        
+
       </div>
-
-    </div>
+    </form>
   </div>
 </div>
 
-<!-- ══════════════════════════════════
-     PROPERTY GRID
-══════════════════════════════════ -->
+<!-- PROPERTY GRID -->
 <section class="list-layout">
   <div class="container">
+
+    <div class="geo-error" id="geo-error" role="alert">
+      <i class="ti ti-alert-circle"></i>
+      <span id="geo-error-msg">Location access was denied or unavailable.</span>
+    </div>
 
     <div class="pl-grid">
       {% for property in properties %}
@@ -113,7 +246,6 @@
         id="pl-card-{{ property.slug }}"
         aria-label="{{ property.title }}"
       >
-        <!-- Image -->
         <div class="pl-card-img">
           {% if property.images.first %}
             <img
@@ -136,7 +268,6 @@
           </div>
         </div>
 
-        <!-- Body -->
         <div class="pl-card-body">
           {% if property.property_type %}
             <div class="pl-card-type">{{ property.property_type }}</div>
@@ -150,6 +281,14 @@
               Location not specified
             {% endif %}
           </div>
+
+          {% if geo_active and property.distance %}
+            <div class="pl-card-distance">
+              <i class="ti ti-location"></i>
+              {{ property.distance.km|floatformat:1 }} km away
+            </div>
+          {% endif %}
+
           <div class="pl-card-divider"></div>
           <div class="pl-card-footer">
             <div class="pl-card-price">
@@ -176,55 +315,46 @@
         <div class="pl-empty-icon"><i class="ti ti-building-off" aria-hidden="true"></i></div>
         <h3>No properties found</h3>
         <p>
-          {% if request.GET.city %}
-            We couldn't find any properties in <strong>{{ request.GET.city }}</strong>.
-            Try a different city or browse all listings.
+          {% if geo_active %}
+            No properties found within <strong>{{ radius_km }} km</strong> of your location. Try increasing the radius.
+          {% elif city_q %}
+            No properties in <strong>{{ city_q }}</strong>. Try a different city.
           {% else %}
-            No properties have been listed yet. Check back soon or add one via the admin panel.
+            No properties listed yet.
           {% endif %}
         </p>
-        {% if request.GET.city %}
-          <a href="{% url 'property_list' %}" class="btn btn-outline" id="browse-all-btn">
-            <i class="ti ti-list"></i> Browse All Properties
-          </a>
-        {% else %}
-          <a href="/admin/property_app/property/add/" class="btn btn-primary" id="add-property-admin-btn">
-            <i class="ti ti-plus"></i> Add a Property
-          </a>
-        {% endif %}
+        <a href="{% url 'property_list' %}" class="btn btn-outline">
+          <i class="ti ti-list"></i> Browse All Properties
+        </a>
       </div>
       {% endfor %}
     </div>
 
-    <!-- ══════════════════════════════
-         PAGINATION
-    ══════════════════════════════ -->
+    <!-- PAGINATION -->
     {% if is_paginated %}
     <nav class="pagination" aria-label="Property pages">
 
-      <!-- Prev -->
       {% if page_obj.has_previous %}
         <a class="page-link"
-           href="?{% if request.GET.city %}city={{ request.GET.city }}&{% endif %}page={{ page_obj.previous_page_number }}"
+           href="?{% if city_q %}city={{ city_q }}&{% endif %}{% if user_lat %}lat={{ user_lat }}&lng={{ user_lng }}&radius={{ radius_km }}&{% endif %}page={{ page_obj.previous_page_number }}"
            aria-label="Previous page">
           <i class="ti ti-chevron-left" aria-hidden="true"></i>
         </a>
       {% else %}
-        <span class="page-link disabled" aria-hidden="true"><i class="ti ti-chevron-left"></i></span>
+        <span class="page-link disabled"><i class="ti ti-chevron-left"></i></span>
       {% endif %}
 
-      <!-- Page numbers -->
       {% for num in paginator.page_range %}
         {% if page_obj.number == num %}
           <span class="page-link active" aria-current="page">{{ num }}</span>
         {% elif num == 1 or num == paginator.num_pages %}
           <a class="page-link"
-             href="?{% if request.GET.city %}city={{ request.GET.city }}&{% endif %}page={{ num }}">
+             href="?{% if city_q %}city={{ city_q }}&{% endif %}{% if user_lat %}lat={{ user_lat }}&lng={{ user_lng }}&radius={{ radius_km }}&{% endif %}page={{ num }}">
             {{ num }}
           </a>
         {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
           <a class="page-link"
-             href="?{% if request.GET.city %}city={{ request.GET.city }}&{% endif %}page={{ num }}">
+             href="?{% if city_q %}city={{ city_q }}&{% endif %}{% if user_lat %}lat={{ user_lat }}&lng={{ user_lng }}&radius={{ radius_km }}&{% endif %}page={{ num }}">
             {{ num }}
           </a>
         {% elif num == page_obj.number|add:"-3" or num == page_obj.number|add:"3" %}
@@ -232,20 +362,17 @@
         {% endif %}
       {% endfor %}
 
-      <!-- Next -->
       {% if page_obj.has_next %}
         <a class="page-link"
-           href="?{% if request.GET.city %}city={{ request.GET.city }}&{% endif %}page={{ page_obj.next_page_number }}"
+           href="?{% if city_q %}city={{ city_q }}&{% endif %}{% if user_lat %}lat={{ user_lat }}&lng={{ user_lng }}&radius={{ radius_km }}&{% endif %}page={{ page_obj.next_page_number }}"
            aria-label="Next page">
           <i class="ti ti-chevron-right" aria-hidden="true"></i>
         </a>
       {% else %}
-        <span class="page-link disabled" aria-hidden="true"><i class="ti ti-chevron-right"></i></span>
+        <span class="page-link disabled"><i class="ti ti-chevron-right"></i></span>
       {% endif %}
 
     </nav>
-
-    <!-- Pagination info text -->
     <p class="pagination-info">
       Page {{ page_obj.number }} of {{ paginator.num_pages }} &mdash;
       {{ paginator.count }} propert{{ paginator.count|pluralize:"y,ies" }} total
@@ -255,4 +382,54 @@
   </div>
 </section>
 
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const locateBtn   = document.getElementById('geo-locate-btn');
+  const locateLabel = document.getElementById('geo-locate-label');
+  const latInput    = document.getElementById('geo-lat');
+  const lngInput    = document.getElementById('geo-lng');
+  const geoError    = document.getElementById('geo-error');
+  const geoMsg      = document.getElementById('geo-error-msg');
+  const geoForm     = document.getElementById('geo-form');
+
+  function showError(msg) {
+    geoMsg.textContent = msg;
+    geoError.style.display = 'flex';
+    setTimeout(() => { geoError.style.display = 'none'; }, 6000);
+  }
+
+  locateBtn.addEventListener('click', () => {
+    if (!navigator.geolocation) {
+      showError('Geolocation is not supported by your browser.');
+      return;
+    }
+    locateLabel.textContent = 'Locating…';
+    locateBtn.disabled = true;
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        latInput.value = pos.coords.latitude.toFixed(6);
+        lngInput.value = pos.coords.longitude.toFixed(6);
+        locateBtn.classList.add('active');
+        locateBtn.disabled = false;
+        geoForm.submit();
+      },
+      (err) => {
+        locateBtn.disabled = false;
+        locateLabel.textContent = 'Near Me';
+        const msgs = {
+          1: 'Location access denied. Please allow location in your browser settings.',
+          2: 'Location unavailable. Check your network and try again.',
+          3: 'Location request timed out.',
+        };
+        showError(msgs[err.code] || 'Could not get your location.');
+      },
+      { timeout: 10000, maximumAge: 60000 }
+    );
+  });
+})();
+</script>
 {% endblock %}

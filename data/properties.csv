@@ -1,5 +1,17 @@
 title,slug,country,state,city,price,property_type,status,bedrooms,bathrooms,address,latitude,longitude
-Sea View Villa,sea-view-villa,Bangladesh,Chattogram,Cox's Bazar,500000,Villa,Available,4,3,Marine Drive Road,21.4272,92.0058
-Beach Resort,beach-resort,Bangladesh,Chattogram,Cox's Bazar,900000,Resort,Available,8,6,Laboni Beach,21.4285,92.0042
-Hill Cottage,hill-cottage,Bangladesh,Chattogram,Bandarban,350000,Cottage,Available,3,2,Bandarban Hill Road,22.1953,92.2184
-Lake House,lake-house,Bangladesh,Dhaka,Gazipur,450000,House,Sold,5,4,Gazipur Lake Side,24.0023,90.4266
+Modern Flat,modern-flat,Bangladesh,Dhaka,Dhaka,250000,Apartment,Available,3,2,Gulshan 2,23.7925,90.4152
+City Office,city-office,Bangladesh,Dhaka,Dhaka,800000,Office,Available,0,2,Motijheel,23.7314,90.4196
+Riverside Plot,riverside-plot,Bangladesh,Khulna,Khulna,200000,Land,Available,0,0,Rupsha River,22.8456,89.5403
+Tea Garden Bungalow,tea-garden-bungalow,Bangladesh,Sylhet,Sylhet,600000,House,Available,5,4,Tea Estate,24.8949,91.8687
+Mango Farm,mango-farm,Bangladesh,Rajshahi,Rajshahi,300000,Land,Available,0,0,Paba Road,24.3745,88.6042
+Business Tower,business-tower,Bangladesh,Dhaka,Dhaka,1200000,Office,Available,0,10,Banani,23.7937,90.4048
+Heritage Home,heritage-home,Bangladesh,Khulna,Bagerhat,400000,House,Available,4,3,Khan Jahan Ali,22.6500,89.7833
+Beachfront Land,beach-land,Bangladesh,Chattogram,Cox's Bazar,750000,Land,Available,0,0,Inani Beach,21.2825,92.0515
+Student Apartment,student-flat,Bangladesh,Dhaka,Savar,150000,Apartment,Available,2,1,Near University,23.8512,90.2582
+Industrial Shed,warehouse-shed,Bangladesh,Chattogram,Chattogram,950000,Commercial,Available,0,2,Port Area,22.3569,91.7832
+Suburban Duplex,suburban-duplex,Bangladesh,Dhaka,Uttara,550000,House,Available,4,3,Sector 10,23.8729,90.3984
+Mountain Lodge,mountain-lodge,Bangladesh,Chattogram,Rangamati,320000,Cottage,Available,2,2,Kaptai Lake,22.6499,92.1724
+Luxury Penthouse,luxury-penthouse,Bangladesh,Dhaka,Dhaka,2000000,Apartment,Available,5,5,Dhanmondi,23.7465,90.3760
+Logistics Hub,logistics-hub,Bangladesh,Dhaka,Tongi,850000,Commercial,Available,0,4,Bypass Road,23.9056,90.4069
+Corner Shop,retail-shop,Bangladesh,Sylhet,Sylhet,280000,Commercial,Available,0,1,Zindabazar,24.8986,91.8706
+Farmhouse Estate,large-farmhouse,Bangladesh,Mymensingh,Mymensingh,480000,House,Available,6,4,Near Brahmaputra,24.7471,90.4203
