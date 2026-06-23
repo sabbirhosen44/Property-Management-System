@@ -5,3 +5,7 @@ pgvector
 Pillow
 pandas
 django-filter
+
+sentence-transformers
+torch
+numpy

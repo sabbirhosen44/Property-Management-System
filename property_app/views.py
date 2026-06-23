@@ -3,6 +3,9 @@ from django.http import JsonResponse
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.measure import D
+from property_app.services.semantic_search_service import (
+    SemanticSearchService
+)
 
 from .models import Property, Location
 
@@ -39,7 +42,9 @@ class PropertyListView(ListView):
 
         city = self.request.GET.get("city", "").strip()
         if city:
-            qs = qs.filter(location__city__icontains=city)
+            locations = (SemanticSearchService.search(city))
+            qs = qs.filter(location__in=locations)
+        
 
         lat = self.request.GET.get("lat", "").strip()
         lng = self.request.GET.get("lng", "").strip()
@@ -137,10 +142,7 @@ class CityAutocompleteView(TemplateView):
 
         if len(query) >= 1:
             locations = (
-                Location.objects
-                .filter(city__icontains=query, is_active=True)
-                .distinct()
-                .order_by("city")[:5]
+                SemanticSearchService.search(query)
             )
             for loc in locations:
                 subtitle = f"{loc.state}, {loc.country}" if loc.state else loc.country
@@ -174,3 +176,40 @@ class CityAutocompleteView(TemplateView):
                 })
 
         return JsonResponse({"results": results})
+    
+    
+
+
+class SemanticLocationSearchView(TemplateView):
+
+    def get(self, request, *args, **kwargs):
+
+        query = request.GET.get(
+            "q",
+            ""
+        ).strip()
+
+        results = []
+
+        if query:
+
+            locations = (
+                SemanticSearchService.search(
+                    query
+                )
+            )
+
+            for location in locations:
+
+                results.append(
+                    {
+                        "id": location.id,
+                        "city": location.city,
+                        "state": location.state,
+                        "country": location.country,
+                    }
+                )
+
+        return JsonResponse(
+            {"results": results}
+        )
